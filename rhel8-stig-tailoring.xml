@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xccdf:Tailoring
+    xmlns:xccdf="http://checklists.nist.gov/xccdf/1.2"
+    id="xccdf_org.ssgproject.content_profile_stig_custom_tailoring">
+
+  <!-- Required metadata -->
+  <xccdf:status date="2025-11-18">draft</xccdf:status>
+  <xccdf:version>1</xccdf:version>
+
+  <!-- This refers to the RHEL 8 benchmark inside ssg-rhel8-ds.xml -->
+  <xccdf:benchmark href="ssg-rhel8-xccdf.xml"/>
+
+  <xccdf:Profile id="xccdf_org.ssgproject.content_profile_stig_custom">
+    <xccdf:title>RHEL 8 STIG - Custom (SCAP Controller VM)</xccdf:title>
+    <xccdf:description>
+      Tailored RHEL 8 STIG profile for a SCAP controller / automation VM.
+      Excludes login/SSH/password/FIPS/firewall/GRUB changes that could
+      interfere with automation or access.
+    </xccdf:description>
+
+    <!-- Start from the official STIG profile -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_profile_stig" selected="true"/>
+
+    <!-- ===========================
+         SSH EXCLUSIONS
+         =========================== -->
+
+    <!-- Keep root login over SSH allowed -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_sshd_disable_root_login" selected="false"/>
+
+    <!-- Keep password authentication over SSH allowed -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_sshd_disable_password_authentication" selected="false"/>
+
+    <!-- Allow empty passwords (we don't want STIG to enforce this here) -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_sshd_disable_empty_passwords" selected="false"/>
+
+    <!-- Keep X11 forwarding / TCP forwarding rules out (less strict for a controller VM) -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_sshd_disable_x11_forwarding" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_sshd_disable_tcp_forwarding" selected="false"/>
+
+    <!-- ===========================
+         PAM / PASSWORD POLICY EXCLUSIONS
+         =========================== -->
+
+    <!-- Password complexity via pam_pwquality -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_pam_pwquality" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_pam_pwquality_retry" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_pam_pwquality_minlen" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_pam_pwquality_difok" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_pam_pwquality_dcredit" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_pam_pwquality_ucredit" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_pam_pwquality_lcredit" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_pam_pwquality_ocredit" selected="false"/>
+
+    <!-- Faillock / account lockout -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_passwords_pam_faillock_deny" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_passwords_pam_faillock_unlock_time" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_passwords_pam_faillock_fail_interval" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_passwords_pam_faillock_enforce_local" selected="false"/>
+
+    <!-- Password aging / expiration -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_set_max_life" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_set_min_life" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_set_warn_age" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_password_pam_enforce_history" selected="false"/>
+
+    <!-- Inactive account disabling -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_set_post_pw_existing" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_set_post_pw_expiration" selected="false"/>
+
+    <!-- ===========================
+         FIPS / CRYPTO EXCLUSIONS
+         =========================== -->
+
+    <!-- Don't force FIPS mode on the controller VM -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_fips_mode_enabled" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_fips_mode_kernel" selected="false"/>
+
+    <!-- ===========================
+         GRUB / BOOTLOADER EXCLUSIONS
+         =========================== -->
+
+    <!-- Don't require GRUB password or UEFI password -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_grub2_password" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_grub2_uefi_password" selected="false"/>
+
+    <!-- Don't force disabling interactive boot if you want to debug -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_grub2_disable_interactive_boot" selected="false"/>
+
+    <!-- ===========================
+         FIREWALL / NETWORK SERVICE EXCLUSIONS
+         =========================== -->
+
+    <!-- Don't force firewalld rules on the scanning VM -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_firewalld_service_sshd_enabled" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_firewalld_default_zone" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_firewalld_zone" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_ensure_firewall_enabled" selected="false"/>
+
+    <!-- ===========================
+         PACKAGE / SERVICE REMOVAL EXCLUSIONS
+         =========================== -->
+
+    <!-- Keep legacy/insecure packages decisions under your control -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_telnet_removed" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_rsh_removed" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_tftp_removed" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_vsftpd_removed" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_samba_removed" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_named_removed" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_postfix_removed" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_rsyslog_removed" selected="false"/>
+
+    <!-- Don't automatically disable services that you may rely on -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_service_avahi_disabled" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_service_cups_disabled" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_service_postfix_disabled" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_service_ntpd_disabled" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_service_chronyd_or_timesyncd_configured" selected="false"/>
+
+    <!-- ===========================
+         AIDE / FILE INTEGRITY EXCLUSIONS
+         =========================== -->
+
+    <!-- Skip AIDE install / schedule on this VM -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_aide_installed" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_aide_periodic_cron_checking" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_aide_build_database" selected="false"/>
+
+    <!-- ===========================
+         MISC YOU MAY NOT WANT ON A TOOLBOX VM
+         =========================== -->
+
+    <!-- Don't enforce extremely strict UMASK defaults here -->
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_umask_etc_profile" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_umask_etc_login_defs" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_accounts_umask_etc_bashrc" selected="false"/>
+
+  </xccdf:Profile>
+</xccdf:Tailoring>
+
